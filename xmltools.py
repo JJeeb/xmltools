@@ -8,6 +8,7 @@ def single(lst):
 def flatten(lst):
     return itertools.chain(*lst)
 
+
 def to_dict(xmlElement):
     d = {}
     tag = xmlElement.tag
