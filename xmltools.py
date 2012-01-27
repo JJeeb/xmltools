@@ -16,10 +16,13 @@ def to_dict(xmlElement):
 
     if xmlElement.attrib or hasChildren:
         d[tag] = { '@' + name : value for name, value in xmlElement.attrib.items() }
-        if xmlElement.text:
+        if xmlElement.text and not xmlElement.text.isspace():
             d[tag].update({'#text': xmlElement.text})
     else:
-        d[tag] = xmlElement.text
+        if xmlElement.text and not xmlElement.text.isspace():
+            d[tag] = xmlElement.text
+        else:
+            d[tag] = None
     
     if hasChildren:
         children = defaultdict(list)
