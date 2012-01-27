@@ -1,5 +1,6 @@
 import itertools
 from collections import defaultdict
+from xml.etree.ElementTree import Element
 
 def single(lst):
     return lst[0] if len(lst) == 1 else lst 
@@ -30,3 +31,24 @@ def to_dict(xmlElement):
             children[k].append(v)
         d[tag].update({ k: single(v) for k, v in children.items() })
     return d
+
+
+
+def from_dict(d):
+    tagname = d.keys()[0]
+    element = Element(tagname)
+    tagvalue = d[tagname]
+    if type(tagvalue) is dict:
+        for name, value in tagvalue.items():
+            if name == '#text':
+                element.text = value
+            elif name[0] == '@':
+                element.attrib[name[1:]] = value
+            else:
+                subElement = Element(tag=name)
+                subElement.text = value
+                element.append(subElement)
+    else:
+        element.text = d[tagname]
+    return element
+
