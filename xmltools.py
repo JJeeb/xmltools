@@ -11,25 +11,14 @@ def flatten(lst):
 
 
 def to_dict(xmlElement):
-    d = {}
-    tag = xmlElement.tag
-    hasChildren = len(xmlElement) != 0
+    d = {'#tag': xmlElement.tag}
+    if xmlElement.text and  not xmlElement.text.isspace():
+        d.update({'#text': xmlElement.text})
+    if xmlElement.attrib:
+        d.update({'@attributes': xmlElement.attrib.copy()}) 
+    if len(xmlElement) != 0:
+        d.update({'#children': [to_dict(c) for c in xmlElement]})
 
-    if xmlElement.attrib or hasChildren:
-        d[tag] = { '@' + name : value for name, value in xmlElement.attrib.items() }
-        if xmlElement.text and not xmlElement.text.isspace():
-            d[tag].update({'#text': xmlElement.text})
-    else:
-        if xmlElement.text and not xmlElement.text.isspace():
-            d[tag] = xmlElement.text
-        else:
-            d[tag] = None
-    
-    if hasChildren:
-        children = defaultdict(list)
-        for k, v in flatten(to_dict(c).items() for c in xmlElement):
-            children[k].append(v)
-        d[tag].update({ k: single(v) for k, v in children.items() })
     return d
 
 
