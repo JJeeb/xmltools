@@ -1,23 +1,26 @@
 from pymongo import Connection
 import sys
 import xmltools
-from xml.etree.ElementTree import parse
+from xml.etree.ElementTree import parse, Element, tostring
 from flask import Flask
-import json
+import xmltools
 
 app = Flask(__name__)
 db = Connection().test
 
 @app.route('/year/<year>')
 def findBookByYear(year):
-    return json.dumps(list(db.books.find({'year': year}, {'_id': 0})))
-
+    booksByYear = db.books.find({'#children': {'$elemMatch': {'#tag': 'year', '#text': year}}})
+    root = Element(tag='books')
+    root.extend(xmltools.from_dict(b) for b in booksByYear)
+    return tostring(root)
 
 
 if __name__ == '__main__':
     db.books.remove()
     xml = parse(sys.argv[1]) 
-    for book in xmltools.to_dict(xml.getroot())['bookstore']['book']:
+    d = xmltools.to_dict(xml.getroot())
+    for book in xmltools.to_dict(xml.getroot())['#children']:
         db.books.insert(book)
 
     app.run(debug=True)
