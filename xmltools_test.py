@@ -24,13 +24,26 @@ class ToDictTest(unittest.TestCase):
 
 
     def test_from_dict(self):
-        self.assert_from_dict({'e': None}, '<e />')  
-        self.assert_from_dict({'e': 'text'}, '<e>text</e>') 
-        self.assert_from_dict({'e': {'@name': 'value', '@id': '12'}}, '<e id="12" name="value" />')  
-        self.assert_from_dict({'e': {'@name': 'value', '#text': 'foo'}}, '<e name="value">foo</e>')  
-        self.assert_from_dict({'e': {'a':'foo', 'b': 'bar'}}, '<e><a>foo</a><b>bar</b></e>')  
-        #self.assert_from_dict({'e': {'a': ['foo', 'bar']}}, '<e><a>foo</a><a>bar</a></e>')  
- 
+        self.assert_from_dict({'#tag': 'e'}, '<e />')  
+        self.assert_from_dict({'#tag': 'e', '#text': 'text'}, '<e>text</e>') 
+        self.assert_from_dict({'#tag': 'e', '@attributes': {'name': 'value', 'id': '12'}}, '<e id="12" name="value" />')  
+        self.assert_from_dict({'#tag':'e', '@attributes': {'name': 'value'}, '#text': 'foo'}, '<e name="value">foo</e>')  
+        self.assert_from_dict(
+                {'#tag': 'e', '#children': [
+                    {'#tag': 'a', '#text': 'foo'},
+                    {'#tag': 'b', '#text': 'bar'}]}, 
+                '<e><a>foo</a><b>bar</b></e>')  
+        self.assert_from_dict(
+                {'#tag': 'e', '#children': [
+                    {'#tag': 'a', '#text': 'foo'},
+                    {'#tag': 'a', '#text': 'bar'}]}, 
+                '<e><a>foo</a><a>bar</a></e>')  
+        self.assert_from_dict(
+                {'#tag': 'e', '#text': 'foo',
+                '#children': [{'#tag': 'a', '#text': 'bar'}]},
+                '<e>foo<a>bar</a></e>')
+
+
     def test_no_blank_text(self):
         self.assert_todict('<e>\n</e>', {'#tag': 'e'})
 
